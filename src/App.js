@@ -1,14 +1,24 @@
+// Save as: src/App.js
 import React, { useState } from 'react';
 import './App.css';
 
-// Read backend URL from env var, with sensible fallbacks
-const API_BASE =
-  process.env.REACT_APP_API_URL?.replace(/\/+$/, '') ||
-  (window.location.hostname === 'localhost'
-    ? 'http://127.0.0.1:5000'
-    : 'https://ai4u-top10-backend.vercel.app');
+// Resolve backend URL from ENV, with smart fallbacks
+const resolveBackendUrl = () => {
+  // 1) If Vercel env var is set, use it
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
 
-function App() {
+  // 2) If running on localhost:3000 (dev), talk to local Flask
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://127.0.0.1:5000/api/generate-list';
+  }
+
+  // 3) Last-resort production default (safe for Vercel)
+  return 'https://ai4u-top10-backend.vercel.app/api/generate-list';
+};
+
+const BACKEND_API = resolveBackendUrl();
+
+export default function App() {
   const [query, setQuery] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,24 +33,26 @@ function App() {
     setResults(null);
 
     try {
-      const response = await fetch(`${API_BASE}/api/generate-list`, {
+      const url = BACKEND_API.includes('/api/')
+        ? BACKEND_API
+        : `${BACKEND_API.replace(/\/$/, '')}/api/generate-list`;
+
+      const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: query.trim(),
-          email: email.trim(),
-        }),
+        body: JSON.stringify({ prompt: query.trim(), email: email.trim() }),
       });
 
-      const data = await response.json();
+      const data = await resp.json();
 
-      if (response.ok && data.success) {
+      if (data?.success) {
         setResults(data);
       } else {
-        setError(data.error || 'Failed to retrieve results from backend.');
+        // Don’t surface upstream URLs—keep it user-friendly
+        setError(data?.error || 'Sorry, something went wrong fetching results.');
       }
-    } catch (err) {
-      setError(`Network error: ${err.message}`);
+    } catch (e) {
+      setError('Network error contacting the AI4U backend. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -143,5 +155,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
