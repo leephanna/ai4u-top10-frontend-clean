@@ -1,22 +1,21 @@
-// Save as: src/App.js
 import React, { useState } from 'react';
 import './App.css';
 
-// Resolve backend URL from ENV, with smart fallbacks
-const resolveBackendUrl = () => {
-  // 1) If Vercel env var is set, use it
-  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-
-  // 2) If running on localhost:3000 (dev), talk to local Flask
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://127.0.0.1:5000/api/generate-list';
+// Build the backend base URL safely.
+// Priority:
+//   1) REACT_APP_API_URL (production on Vercel)
+//   2) http://127.0.0.1:5000 (local Flask when developing)
+//   3) hard fallback to the production backend (safety)
+const API_BASE = (() => {
+  const fromEnv = process.env.REACT_APP_API_URL;
+  if (fromEnv && typeof fromEnv === 'string') {
+    return fromEnv.replace(/\/+$/, ''); // strip trailing slash
   }
-
-  // 3) Last-resort production default (safe for Vercel)
-  return 'https://ai4u-top10-backend.vercel.app/api/generate-list';
-};
-
-const BACKEND_API = resolveBackendUrl();
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://127.0.0.1:5000';
+  }
+  return 'https://ai4u-top10-backend.vercel.app';
+})();
 
 export default function App() {
   const [query, setQuery] = useState('');
@@ -33,26 +32,25 @@ export default function App() {
     setResults(null);
 
     try {
-      const url = BACKEND_API.includes('/api/')
-        ? BACKEND_API
-        : `${BACKEND_API.replace(/\/$/, '')}/api/generate-list`;
-
-      const resp = await fetch(url, {
+      // Always hit the backend — never Rainforest from the browser
+      const resp = await fetch(`${API_BASE}/api/generate-list`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: query.trim(), email: email.trim() }),
+        body: JSON.stringify({
+          prompt: query.trim(),
+          email: email.trim(),
+        }),
       });
 
       const data = await resp.json();
 
-      if (data?.success) {
-        setResults(data);
-      } else {
-        // Don’t surface upstream URLs—keep it user-friendly
-        setError(data?.error || 'Sorry, something went wrong fetching results.');
+      if (!resp.ok || data.success === false) {
+        throw new Error(data.error || `Request failed (${resp.status})`);
       }
+
+      setResults(data);
     } catch (e) {
-      setError('Network error contacting the AI4U backend. Please try again.');
+      setError(e.message || 'Network error');
     } finally {
       setLoading(false);
     }
@@ -96,7 +94,7 @@ export default function App() {
         </div>
       )}
 
-      {results?.success && (
+      {results && results.success && (
         <div className="results">
           <div className="results-header">
             <h2>{results.title}</h2>
@@ -133,7 +131,9 @@ export default function App() {
           </div>
 
           <div className="results-footer">
-            <p>Generated: {results.generated_at} | Affiliate ID: {results.affiliate_id}</p>
+            <p>
+              Generated: {results.generated_at} | Affiliate ID: {results.affiliate_id}
+            </p>
           </div>
         </div>
       )}
