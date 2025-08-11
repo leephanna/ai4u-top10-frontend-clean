@@ -1,47 +1,45 @@
 import React, { useState } from 'react';
 import './App.css';
 
+// Read backend URL from env var, with sensible fallbacks
+const API_BASE =
+  process.env.REACT_APP_API_URL?.replace(/\/+$/, '') ||
+  (window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:5000'
+    : 'https://ai4u-top10-backend.vercel.app');
+
 function App() {
-  // State
   const [query, setQuery] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
 
-  // Backend API URL - NO direct Rainforest API calls
-  const BACKEND_API = 'https://ai4u-top10-backend.vercel.app/api/generate-list';
-
-  // Handle search
   const handleSearch = async () => {
     if (!query.trim()) return;
 
     setLoading(true);
     setError(null);
     setResults(null);
-    
+
     try {
-      console.log('Calling backend API at:', BACKEND_API);
-      
-      const response = await fetch(BACKEND_API, {
+      const response = await fetch(`${API_BASE}/api/generate-list`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: query.trim(),
-          email: email.trim()
-        })
+          email: email.trim(),
+        }),
       });
 
       const data = await response.json();
-      console.log('Response data:', data);
-      
-      if (data.success) {
+
+      if (response.ok && data.success) {
         setResults(data);
       } else {
-        setError(data.error || 'Failed to retrieve results');
+        setError(data.error || 'Failed to retrieve results from backend.');
       }
     } catch (err) {
-      console.error('API call failed:', err);
       setError(`Network error: ${err.message}`);
     } finally {
       setLoading(false);
@@ -63,7 +61,7 @@ function App() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g., vitamins, gaming headphones, baby toys..."
-            onKeyPress={(e) => e.key === 'Enter' && !loading && handleSearch()}
+            onKeyDown={(e) => e.key === 'Enter' && !loading && handleSearch()}
           />
 
           <label>Email address (optional - to receive your list)</label>
@@ -74,24 +72,19 @@ function App() {
             placeholder="your@email.com"
           />
 
-          <button 
-            onClick={handleSearch}
-            disabled={loading || !query.trim()}
-          >
+          <button onClick={handleSearch} disabled={loading || !query.trim()}>
             {loading ? 'Searching...' : 'Generate Top 10 List'}
           </button>
         </div>
       </div>
 
-      {/* Error message */}
       {error && (
         <div className="error-message">
           <p>Error: {error}</p>
         </div>
       )}
 
-      {/* Results */}
-      {results && results.success && (
+      {results?.success && (
         <div className="results">
           <div className="results-header">
             <h2>{results.title}</h2>
@@ -112,9 +105,9 @@ function App() {
                   </div>
                   <p>{product.description}</p>
                   <div className="product-actions">
-                    <a 
-                      href={product.affiliate_link} 
-                      target="_blank" 
+                    <a
+                      href={product.affiliate_link}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="amazon-button"
                     >
@@ -126,7 +119,7 @@ function App() {
               </div>
             ))}
           </div>
-          
+
           <div className="results-footer">
             <p>Generated: {results.generated_at} | Affiliate ID: {results.affiliate_id}</p>
           </div>
