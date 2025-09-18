@@ -1,274 +1,165 @@
-/* Base styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ============================
+   AI4U Top 10 • App.css
+   ============================ */
+
+/* Base reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root{
+  --ai4u-neon: #7c3aed;     /* purple */
+  --ai4u-neon2: #22d3ee;    /* cyan */
+  --ai4u-surface: rgba(255,255,255,0.10);
+  --ai4u-border:  rgba(255,255,255,0.20);
+  --ai4u-text-subtle: rgba(255,255,255,0.85);
 }
 
-body {
+/* Page background */
+body{
   font-family: Arial, sans-serif;
   color: white;
-  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #ec4899 100%);
   min-height: 100vh;
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #ec4899 100%);
 }
 
-.app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+/* App container (optional wrapper if used) */
+.app{ max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* ============================
+   Futuristic glow skin
+   ============================ */
+.ai4u-glow{
+  position: relative;
+  overflow: hidden;
+}
+.ai4u-glow::after{
+  content:"";
+  position:absolute; inset:-40%;
+  background: conic-gradient(from 0deg, transparent 0 70%, rgba(255,255,255,.08) 70% 100%);
+  animation: ai4u-spin 18s linear infinite;
+  pointer-events:none;
+}
+@keyframes ai4u-spin{ to{ transform: rotate(360deg); } }
+
+.ai4u-card{
+  background: var(--ai4u-surface);
+  border: 1px solid var(--ai4u-border);
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 6px 24px rgba(0,0,0,.25),
+    0 0 0 1px rgba(124,58,237,.15) inset;
 }
 
-/* Header */
-header {
-  text-align: center;
-  margin-bottom: 40px;
+/* ============================
+   Header + home link
+   ============================ */
+header{ text-align: center; margin-bottom: 40px; }
+header h1{ font-size: 3rem; margin-bottom: 16px; }
+header p{
+  font-size: 1.2rem; opacity: 0.9;
+  max-width: 640px; margin: 0 auto;
 }
 
-header h1 {
-  font-size: 3rem;
-  margin-bottom: 16px;
+.ai4u-topbar{
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; margin-bottom: 12px;
 }
-
-header p {
-  font-size: 1.2rem;
-  opacity: 0.9;
-  max-width: 600px;
-  margin: 0 auto;
+.ai4u-logo{
+  background: linear-gradient(135deg, var(--ai4u-neon2), var(--ai4u-neon));
+  -webkit-background-clip: text; background-clip:text; color:transparent;
+  font-weight: 800;
+  letter-spacing: .5px;
 }
+.ai4u-link{ color:#a5b4fc; text-decoration:underline; }
+.ai4u-link:hover{ color:#c4b5fd; }
 
-/* Search section */
-.search-container {
-  max-width: 600px;
-  margin: 0 auto 40px auto;
-}
-
-.search-box {
-  background: rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 30px;
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.search-box label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.search-box input {
+/* ============================
+   Inputs + buttons
+   ============================ */
+input[type="text"], input[type="email"]{
   width: 100%;
   padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  border: 1px solid var(--ai4u-border);
+  background: rgba(255,255,255,0.20);
   color: white;
-  font-size: 16px;
   outline: none;
-  margin-bottom: 20px;
+}
+input::placeholder{ color: rgba(255,255,255,0.75); }
+
+.ai4u-btn{
+  background: linear-gradient(135deg, var(--ai4u-neon) 0%, #ec4899 100%);
+  color:#fff; border:none; border-radius:12px;
+  padding:10px 16px; font-weight:700;
+  display:inline-flex; align-items:center; gap:8px;
+  cursor:pointer;
+  box-shadow: 0 0 0 0 rgba(34,211,238,0.0);
+  transition: transform .06s ease, box-shadow .2s ease;
+  text-decoration: none; /* for <a> usage */
+}
+.ai4u-btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 24px rgba(34,211,238,.25); }
+.ai4u-btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* ============================
+   Product list layout
+   ============================ */
+.ai4u-row{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
 }
 
-.search-box input::placeholder {
-  color: rgba(255,255,255,0.6);
+.ai4u-rank{
+  width:48px; height:48px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg,#9333ea 0%,#ec4899 100%);
+  font-weight:800;
 }
 
-.search-box button {
+.ai4u-img{
+  max-width: 140px;
   width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin-bottom: 10px;
 }
 
-.search-box button:disabled {
-  background: #666;
-  cursor: not-allowed;
-}
-
-.search-box button:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-/* Error message */
-.error-message {
-  max-width: 1000px;
-  margin: 0 auto 20px auto;
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.error-message p {
-  color: #fca5a5;
-}
-
-/* Results */
-.results {
-  max-width: 1000px;
-  margin: 0 auto;
-  background: rgba(255,255,255,0.1);
-  border-radius: 20px;
-  padding: 30px;
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.results-header {
-  margin-bottom: 30px;
-}
-
-.results-header h2 {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.green-text {
-  color: #86efac;
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-.blue-text {
-  color: #93c5fd;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-.product-list {
-  display: grid;
-  gap: 16px;
-}
-
-.product-card {
-  background: rgba(255,255,255,0.2);
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(255,255,255,0.3);
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.product-number {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.product-details {
-  flex: 1;
-}
-
-.product-details h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.product-meta {
-  margin-bottom: 8px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.price {
-  color: #86efac;
-  font-weight: bold;
-  font-size: 1.25rem;
-}
-
-.product-details p {
-  opacity: 0.9;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.product-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.amazon-button {
-  background: #f97316;
-  color: white;
-  padding: 8px 16px;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  display: inline-block;
-}
-
-.asin {
-  font-size: 12px;
-  color: #86efac;
-  padding: 4px 8px;
-}
-
-.results-footer {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.2);
-  text-align: center;
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* Features */
-.features {
-  max-width: 1000px;
-  margin: 40px auto 0 auto;
+/* Simple grid for sections of cards/tiles */
+.grid-auto{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
 }
 
-.feature-card {
-  background: rgba(255,255,255,0.1);
+/* Feature tiles (bottom three) */
+.feature-card{
+  background: var(--ai4u-surface);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
-  text-align: center;
+  border: 1px solid var(--ai4u-border);
+  text-align:center;
+}
+.feature-card h3{ font-weight: 600; margin-bottom: 8px; }
+.feature-card p{ font-size: 14px; opacity: .85; }
+
+/* ============================
+   Responsive (phones-first)
+   ============================ */
+@media (max-width: 560px){
+  header h1{ font-size: 2.2rem; }
+
+  .ai4u-row{
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .ai4u-rank{ margin-bottom: 8px; }
+  .ai4u-img{ max-width: 62%; }
+
+  .grid-auto{ grid-template-columns: 1fr; }
 }
 
-.feature-card h3 {
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.feature-card p {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 2rem;
-  }
-  
-  .search-box {
-    padding: 20px;
-  }
-  
-  .results {
-    padding: 20px;
-  }
-}
+/* Small utility spacing (optional) */
+.mt-20{ margin-top: 20px; }
+.mb-20{ margin-bottom: 20px; }
